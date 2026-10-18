@@ -250,7 +250,7 @@ function makeGear(bossReward=false, rewardFloor=floor){
  const types=['weapon','armor','acc1','acc2'], type=types[rand(0,3)], level=1+(rewardFloor-1)*.009, boss=bossReward;
  const power=1+(rewardFloor-1)*.021;
  let stats={hp:0,atk:0,def:0,spd:0};
- const roll=()=>Math.max(1,ceil(rand(1,4)*power*(boss?1.1:1)));
+ const roll=()=>Math.max(1,ceil(rand(1,4)*power*(boss?1.2:1)));
  if(type==='weapon'){stats.atk=roll()+ceil(power*1.5);stats.spd=roll()+ceil(power);stats.hp=roll();stats.def=roll()}
  else if(type==='armor'){stats.hp=roll()*3+ceil(power*2);stats.def=roll()+ceil(power*1.5);stats.atk=roll();stats.spd=roll()}
  else {stats.hp=roll()+ceil(power*.6);stats.atk=roll();stats.def=roll();stats.spd=roll()}
