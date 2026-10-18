@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#17243b">
+<title>無限階層の塔</title>
+<style>
+:root{--bg:#101827;--panel:#1b2940;--panel2:#243651;--gold:#ffd166;--text:#f3f6fb;--muted:#a9b7ca;--red:#ff7272;--green:#70e1a1}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+body{overflow:hidden}.app{height:100dvh;max-width:760px;margin:auto;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);gap:8px}
+header{display:flex;justify-content:space-between;align-items:center;min-height:42px;gap:8px}h1{font-size:18px;margin:0;letter-spacing:.04em}.floor{font-size:14px;color:var(--gold);font-weight:800;white-space:nowrap}
+.battle{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid #344660;border-radius:16px;overflow:hidden;background:#18253a}
+.arena{flex:1.15;min-height:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;background:radial-gradient(ellipse at 50% 85%,#72a94d 0%,#397746 38%,#1c463a 78%);transition:background .4s}
+.arena.biome-grass{background:radial-gradient(ellipse at 50% 85%,#8bc45a 0%,#4c8b45 38%,#244d38 78%)}
+.arena.biome-cave{background:radial-gradient(ellipse at 50% 85%,#68717d 0%,#394653 38%,#171d2b 78%)}
+.arena.biome-volcano{background:radial-gradient(ellipse at 50% 85%,#ed6a32 0%,#8c302b 38%,#301c2b 78%)}
+.arena.biome-forest{background:radial-gradient(ellipse at 50% 85%,#427d4e 0%,#214d3e 38%,#102c2e 78%)}
+.arena.biome-snow{background:radial-gradient(ellipse at 50% 85%,#b5d8e6 0%,#648ca8 38%,#263e61 78%)}
+.arena.biome-desert{background:radial-gradient(ellipse at 50% 85%,#e0b76a 0%,#a66d43 38%,#513a38 78%)}
+.arena:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,#0c1423aa),repeating-linear-gradient(90deg,transparent 0 45px,#ffffff08 46px 47px);pointer-events:none}
+.moon{position:absolute;right:12%;top:12%;width:42px;height:42px;border-radius:50%;background:#f6e9b8;box-shadow:0 0 28px #f6e9b866}
+.enemy-icon{position:relative;z-index:1;font-size:clamp(62px,12vh,100px);line-height:1.15;filter:drop-shadow(0 8px 5px #0008);transition:transform .2s}
+.enemy-icon.hit{animation:hit .18s}@keyframes hit{50%{transform:translateX(8px) rotate(5deg);filter:brightness(1.8)}}
+.enemy-name{position:relative;z-index:1;font-weight:800;font-size:16px;text-shadow:0 2px 4px #000}
+.boss-tag{color:#ffb4b4;font-size:11px;font-weight:900;letter-spacing:.15em}
+.hp-wrap{position:relative;z-index:1;width:min(80%,310px);background:#080d16b8;border-radius:9px;padding:7px 10px;font-size:12px}
+.hp-label{display:flex;justify-content:space-between;margin-bottom:5px}.bar{height:8px;border-radius:10px;background:#465166;overflow:hidden}.bar>i{display:block;height:100%;background:linear-gradient(90deg,#ff6464,#ff9b75);width:100%;transition:width .2s}
+.log-area{flex:.85;min-height:112px;background:#0d1523;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;border-top:1px solid #35455c}
+.log-title{font-size:10px;color:var(--muted);letter-spacing:.12em;margin-bottom:5px}.logs{display:flex;flex-direction:column;gap:5px;font-size:12px;line-height:1.35}.log{min-height:16px;color:#dce6f4}.log:last-child{color:#fff;font-weight:650}.log.good{color:var(--green)}.log.bad{color:#ffaaaa}
+.player-stats{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#131f31;padding:8px 10px;border-radius:10px;font-size:11px;color:var(--muted)}
+.player-stats strong{color:#fff}.player-hp{flex:1;min-width:0}.player-hp .bar{height:6px;margin-top:4px}.player-hp .bar i{background:linear-gradient(90deg,#3ccf91,#a2f4b5)}
+.command{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
+.actions{display:flex;gap:8px}.fight{flex:1;background:linear-gradient(180deg,#ffcf70,#f3a93c);color:#36230a;font-weight:900;font-size:18px;border:0;border-radius:12px;padding:13px;box-shadow:0 3px 0 #a96b20}.fight:disabled{opacity:.45;box-shadow:none}.subbtn{background:var(--panel2);border:1px solid #3a506d;color:white;border-radius:12px;padding:10px 14px;font-weight:700}
+.equipment{background:var(--panel);border:1px solid #344660;border-radius:12px;padding:9px 10px;min-height:0}
+.equip-title{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;margin-bottom:7px}.equip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.equip{background:#121d2d;border-radius:8px;padding:6px 8px;min-width:0;border:1px solid #2d3d53}
+.equip .slot{font-size:10px;color:var(--muted)}.equip .item{font-size:11px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.equip .stats{font-size:10px;color:#b9d8ff;margin-top:2px}
+.star{color:var(--gold);letter-spacing:2px}.up{color:#70e1a1;font-weight:850}.down{color:#ff7272;font-weight:850}.same{color:#b9c6d8}
+.modal-back{position:fixed;inset:0;background:#050a12c9;z-index:5;display:flex;align-items:center;justify-content:center;padding:18px}
+.modal{width:min(100%,420px);max-height:85dvh;overflow:auto;background:#1b2940;border:1px solid #50647f;border-radius:16px;padding:18px;box-shadow:0 20px 80px #0009}
+.modal h2{font-size:18px;margin:0 0 8px}.modal p{font-size:13px;color:#c0cede;line-height:1.5;margin:8px 0 14px}
+.item-card{background:#111d2e;border:1px solid #405571;border-radius:10px;padding:12px;margin:10px 0}.item-card .big{font-size:15px;font-weight:850}.item-card .detail{font-size:12px;color:#bad3ef;margin-top:5px}.modal-actions{display:flex;gap:8px;margin-top:14px}.modal-actions button{flex:1;border-radius:10px;padding:12px 8px;border:0;font-weight:800}.yes{background:#ffd166;color:#35260c}.no{background:#354761;color:white}
+.notice{font-size:11px;color:#a9b7ca;text-align:center;margin-top:8px}
+@media(min-height:800px){.app{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom));gap:10px}.arena{flex:1.35}.log-area{flex:.65}.command{gap:10px}.equip{padding:8px 10px}.equip .item{font-size:12px}}
+@media(max-height:650px){header{min-height:30px}h1{font-size:16px}.arena{flex:1}.log-area{min-height:95px;padding:7px 10px}.logs{font-size:11px;gap:3px}.fight{padding:9px;font-size:16px}.equipment{padding:6px 8px}.equip{padding:5px 7px}.player-stats{padding:6px 8px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>⚔ 無限階層の塔</h1><div class="floor" id="floor"><span id="clearCount">★0</span>　 第 1 階</div></header>
+<section class="battle">
+  <div class="arena" id="arena">
+    <div class="moon"></div>
+    <div class="enemy-icon" id="enemyIcon">🐺</div>
+    <div class="enemy-name" id="enemyName">迷い狼</div>
+    <div class="boss-tag" id="bossTag"></div>
+    <div class="hp-wrap" id="enemyHpWrap"><div class="hp-label"><span>HP</span><span id="enemyHpText">18 / 18</span></div><div class="bar"><i id="enemyHpBar"></i></div></div>
+  </div>
+  <div class="log-area"><div class="logs" id="logs"><div class="log">塔の探索が始まった。</div><div class="log">敵を倒して上の階を目指そう。</div><div class="log">「たたかう」で戦闘開始。</div></div></div>
+</section>
+<div class="player-stats">
+  <div class="player-hp"><div>あなたのHP <strong id="playerHpText">100 / 100</strong></div><div class="bar"><i id="playerHpBar"></i></div></div>
+</div>
+<section class="command">
+  <div class="actions"><button class="fight" id="fightBtn">⚔ たたかう</button><button class="subbtn" id="statusBtn">能力値</button></div>
+  <div class="equipment">
+    <div class="equip-title"><span>🎒 装備</span></div>
+    <div class="equip-grid" id="equipGrid"></div>
+  </div>
+</section>
+
+</div>
+<div id="modalRoot"></div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const enemyTypes=[
+ ['迷い狼','🐺','素早さ',.82,.92,.78,1.35],['岩トカゲ','🦎','防御力',.95,.82,1.4,.8],['森のスライム','🟢','体力',1.35,.75,.9,.7],
+ ['山賊','🗡️','攻撃力',.9,1.3,.8,1],['骸骨剣士','💀','攻撃力',.85,1.25,1.05,.95],['毒キノコ','🍄','体力',1.2,.85,1.05,.8],
+ ['洞窟コウモリ','🦇','素早さ',.75,.9,.75,1.45],['鉄ゴーレム','🗿','防御力',1.15,.9,1.5,.55],['炎の精','🔥','攻撃力',.8,1.4,.75,1.15],
+ ['沼のオーガ','👹','体力',1.35,1.15,1.05,.65],['氷狼','🐺','素早さ',.85,1.05,.9,1.3],['呪いの本','📕','攻撃力',.8,1.4,.85,.9],
+ ['砂漠サソリ','🦂','防御力',.9,1.05,1.35,1.05],['幽霊','👻','素早さ',.8,1.1,.7,1.4],['ミミック','🧰','体力',1.3,1.1,1.1,.75],
+ ['大角の獣','🐗','攻撃力',1.05,1.35,.95,.85],['深海クラゲ','🪼','体力',1.25,.85,1.0,.85],['闇の騎士','🛡️','防御力',.95,1.15,1.45,.8],
+ ['砂嵐の魔人','🌪️','素早さ',.85,1.15,.8,1.35],['毒蛇','🐍','攻撃力',.8,1.25,.85,1.25],['宝石虫','🪲','防御力',.95,1.0,1.4,.9],
+ ['魔法使い','🧙','攻撃力',.8,1.45,.75,1.05],['巨大カニ','🦀','防御力',1.1,1.0,1.5,.7],['ワイバーン','🐉','体力',1.15,1.25,1.0,1.05],
+ ['雷鳥','🦅','素早さ',.85,1.2,.85,1.4],['呪われた鎧','⚔️','防御力',1.0,1.1,1.5,.8],['深淵の目','👁️','攻撃力',.85,1.4,.9,1.1],
+ ['古代樹','🌳','体力',1.4,1.0,1.2,.65],['悪魔','😈','攻撃力',.95,1.35,1.0,1.1],['塔の番犬','🐲','体力',1.2,1.2,1.1,1.1]
+];
+const slotNames={weapon:'武器',armor:'防具',acc1:'アクセサリー1',acc2:'アクセサリー2'};
+const slotIcons={weapon:'⚔️',armor:'🛡️',acc1:'💍',acc2:'📿'};
+const initial={hp:100,atk:12,def:5,spd:10};
+const SAVE_KEY='infiniteTowerGameSaveV1';
+const emptyGear=()=>({weapon:null,armor:null,acc1:null,acc2:null});
+const defaultLogs=['塔の探索が始まった。','敵を倒して上の階を目指そう。','「たたかう」で戦闘開始。'];
+let base={...initial}, floor=1, playerHp=100, enemy=null, fighting=false, cleared=false, clearCount=0, bonusLabel='なし', gear=emptyGear(), logs=[...defaultLogs], fightToken=0, pendingLoot=null; 
+function saveGame(){
+ try{localStorage.setItem(SAVE_KEY,JSON.stringify({version:1,balanceVersion:5,base,floor,playerHp,enemy,cleared,clearCount,bonusLabel,gear,logs,pendingLoot}));}catch(e){/* 保存不可の環境ではゲーム自体は続行 */}
+}
+function loadGame(){
+ try{
+  const raw=localStorage.getItem(SAVE_KEY);if(!raw)return false;const d=JSON.parse(raw);
+  if(!d||d.version!==1||!d.base||!Number.isFinite(d.floor))return false;
+  base={...initial,...d.base};floor=Math.max(1,Math.min(1000,Math.floor(d.floor)));playerHp=Number.isFinite(d.playerHp)?d.playerHp:base.hp;
+  enemy=d.enemy||null;
+  if(enemy && d.balanceVersion!==5){enemy=null;}
+  cleared=!!d.cleared;clearCount=Math.max(0,Math.floor(d.clearCount||0));bonusLabel=typeof d.bonusLabel==='string'?d.bonusLabel:'なし';
+  gear={...emptyGear(),...(d.gear||{})};logs=Array.isArray(d.logs)?d.logs.slice(-3):[...defaultLogs];pendingLoot=d.pendingLoot||null;
+  return true;
+ }catch(e){return false;}
+}
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const ceil=Math.ceil;
+function totalStats(){let s={...base};Object.values(gear).forEach(g=>{if(g)Object.keys(s).forEach(k=>s[k]+=g.stats[k]||0)});return s}
+function addLog(msg,kind=''){logs.push({msg,kind});logs=logs.slice(-3);renderLogs();saveGame()}
+function renderLogs(){ $('logs').innerHTML=logs.map(x=>typeof x==='string'?`<div class="log">${x}</div>`:`<div class="log ${x.kind}">${x.msg}</div>`).join('')}
+function makeEnemy(){
+ const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.0221;
+ const mult=boss?1.5:1;
+ const stats={hp:Math.max(1,ceil(26*scale*t[3]*mult)),atk:Math.max(1,ceil(7*scale*t[4]*mult)),def:Math.max(0,ceil(3*scale*t[5]*mult)),spd:Math.max(1,ceil(6*scale*t[6]*mult))};
+ return {name:t[0],icon:t[1],trait:t[2],stats,hp:stats.hp,maxHp:stats.hp,boss};
+}
+function makeGear(bossReward=false, rewardFloor=floor){
+ const types=['weapon','armor','acc1','acc2'], type=types[rand(0,3)], level=1+(rewardFloor-1)*.009, boss=bossReward;
+ const power=1+(rewardFloor-1)*.021;
+ let stats={hp:0,atk:0,def:0,spd:0};
+ const roll=()=>Math.max(1,ceil(rand(1,4)*power*(boss?1.1:1)));
+ if(type==='weapon'){stats.atk=roll()+ceil(power*1.5);stats.spd=roll()+ceil(power);stats.hp=rand(0,1);stats.def=rand(0,1)}
+ else if(type==='armor'){stats.hp=roll()*3+ceil(power*2);stats.def=roll()+ceil(power*1.5);stats.atk=rand(0,1);stats.spd=rand(0,1)}
+ else {stats.hp=roll()+ceil(power*.6);stats.atk=roll();stats.def=roll();stats.spd=roll()}
+ Object.keys(stats).forEach(k=>stats[k]=Math.max(0,stats[k]));
+ return {type,name:`${['古びた','旅人の','鋼の','精霊の','覇者の'][Math.min(4,Math.floor((rewardFloor-1)/200))]}${slotNames[type]}`,stats,floor:rewardFloor,boss};
+}
+function fmtStats(s){return `HP +${s.hp} / 攻 +${s.atk} / 防 +${s.def} / 速 +${s.spd}`}
+function renderGear(){ $('equipGrid').innerHTML=Object.keys(gear).map(k=>{let g=gear[k];return `<div class="equip"><div class="slot">${slotIcons[k]} ${slotNames[k]}</div><div class="item">${g?g.name:'なし'}</div><div class="stats">${g?`HP+${g.stats.hp} 攻+${g.stats.atk} 防+${g.stats.def} 速+${g.stats.spd}`:'効果なし'}</div></div>`}).join('')}
+function compareGear(item,current){
+ const labels={hp:'HP',atk:'攻撃',def:'防御',spd:'素早さ'};
+ return Object.keys(labels).map(k=>{
+  const next=item.stats[k]||0, prev=current?(current.stats[k]||0):0;
+  const cls=next>prev?'up':next<prev?'down':'same';
+  const arrow=next>prev?'▲':next<prev?'▼':'＝';
+  return `<span class="${cls}">${labels[k]} ${arrow} ${prev} → ${next}</span>`;
+ }).join('<br>');
+}
+function render(){
+ saveGame();
+ $('floor').innerHTML=`<span id="clearCount">★${clearCount}</span>　 第 ${floor} 階${enemy?.boss?' · BOSS':''}`;
+ $('playerHpText').textContent=`${Math.max(0,playerHp)} / ${totalStats().hp}`;
+ $('playerHpBar').style.width=`${Math.max(0,playerHp)/totalStats().hp*100}%`;
+ const biomes=['biome-grass','biome-cave','biome-volcano','biome-forest','biome-snow','biome-desert'];
+ $('arena').classList.remove(...biomes);$('arena').classList.add(biomes[Math.floor((floor-1)/20)%biomes.length]);
+
+ if(enemy){
+  $('enemyIcon').style.display='';$('enemyName').style.display='';$('bossTag').style.display='';$('enemyHpWrap').style.display='';
+  $('enemyIcon').textContent=enemy.icon;$('enemyName').textContent=enemy.name;
+  $('bossTag').textContent=enemy.boss?'★ BOSS ★':'';
+  $('enemyHpText').textContent=`${Math.max(0,enemy.hp)} / ${enemy.maxHp}`;
+  $('enemyHpBar').style.width=`${Math.max(0,enemy.hp)/enemy.maxHp*100}%`;
+ }else{
+  $('enemyIcon').style.display='none';$('enemyName').style.display='none';$('bossTag').style.display='none';$('enemyHpWrap').style.display='none';
+  /* 敵がいない間は戦闘画面に何も表示しない */
+ }
+ $('fightBtn').disabled=fighting||cleared&&floor===1000;
+ $('fightBtn').textContent=cleared&&floor===1?'⚔ たたかう':'⚔ たたかう';
+ renderGear();
+}
+function newEnemy(){playerHp=totalStats().hp;enemy=makeEnemy();render();addLog(`${enemy.boss?'ボス':'敵'}「${enemy.name}」が現れた。`)}
+function attackDamage(atk,def){return Math.max(1,atk-Math.floor(def*.55)+rand(-2,2))}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function fight(){
+ if(fighting||!enemy||playerHp<=0)return;
+ fighting=true;const token=++fightToken;$('fightBtn').disabled=true;
+ const foe=enemy, stats=totalStats();addLog(`第${floor}階の戦闘開始！`);
+ await sleep(280);
+ while(token===fightToken&&foe===enemy&&playerHp>0&&foe.hp>0){
+  const playerFirst=stats.spd>=foe.stats.spd;
+  const order=playerFirst?['p','e']:['e','p'];
+  for(const who of order){
+   if(token!==fightToken||foe!==enemy||playerHp<=0||foe.hp<=0)break;
+   if(who==='p'){
+    const d=attackDamage(stats.atk,foe.stats.def);foe.hp=Math.max(0,foe.hp-d);
+    $('enemyIcon').classList.remove('hit');void $('enemyIcon').offsetWidth;$('enemyIcon').classList.add('hit');
+    addLog(`あなたは${foe.name}に ${d} ダメージを与えた。`,'good');
+   }else{
+    const d=attackDamage(foe.stats.atk,stats.def);playerHp=Math.max(0,playerHp-d);
+    addLog(`${foe.name}はあなたに ${d} ダメージを与えた。`,'bad');
+   }
+   render();await sleep(420);
+  }
+ }
+ if(token!==fightToken)return;
+ fighting=false;
+ if(playerHp<=0){
+  const old=floor;floor=Math.max(1,floor-10);playerHp=totalStats().hp;enemy=null;
+  addLog(`あなたは敗北した。第${old}階から第${floor}階へ戻された。`,'bad');
+  addLog('HPが全回復した。再挑戦しよう。');render();await sleep(450);newEnemy();
+ }else if(foe.hp<=0){
+  addLog(`${foe.name}を倒した！`,'good');enemy=null;render();
+  if(floor===1000){
+   cleared=true;clearCount++;render();
+   showClearModal();
+  }else{
+   const loot=makeGear(foe.boss,floor);floor=Math.min(1000,floor+1);playerHp=totalStats().hp;
+   const current=gear[loot.type];
+   const improvesAnyStat=!current||Object.keys(loot.stats).some(k=>(loot.stats[k]||0)>(current.stats[k]||0));
+   if(improvesAnyStat){pendingLoot=loot;render();showLoot(loot)}
+   else{pendingLoot=null;addLog(`${loot.name}は現在の装備より優れた能力がないためスキップした。`);render();newEnemy()}
+  }
+ }
+ render();
+}
+function showClearModal(){
+ showModal('🎉 ゲームクリア！',`1000階を制覇しました！<br><br>クリア回数：<strong>★${clearCount}</strong><br><br>ボーナスを取得して第1階から再挑戦しますか？`,[
+  {label:'ボーナスを取得して再挑戦',cls:'yes',action:()=>{
+   const keys=['hp','atk','def','spd'],key=keys[rand(0,3)],times=2,names={hp:'体力',atk:'攻撃力',def:'防御力',spd:'素早さ'};
+   base[key]=initial[key]*times;bonusLabel=`${names[key]} ${times}倍`;gear=emptyGear();floor=1;playerHp=totalStats().hp;cleared=false;pendingLoot=null;
+   addLog(`ボーナス：初期${names[key]}が${times}倍になった。`,'good');addLog('装備をリセットして第1階から再スタート！');render();newEnemy();
+  }},
+  {label:'ここで終了',cls:'no',action:()=>{cleared=true;enemy=null;render();addLog('ゲームクリア！再挑戦はいつでも選択できます。','good')}}
+ ]);
+}
+function showLoot(item){
+ pendingLoot=item;saveGame();
+ const current=gear[item.type];
+ const statsText=fmtStats(item.stats);
+ const oldText=current?`現在：${current.name}<br>${fmtStats(current.stats)}`:'現在：装備なし';
+ showModal('🎁 装備を獲得！',`敵を倒して装備を見つけた！`,[
+  {label:'装備する',cls:'yes',action:()=>{gear[item.type]=item;pendingLoot=null;playerHp=totalStats().hp;addLog(`${item.name}を装備した。`,'good');render();newEnemy()}},
+  {label:'装備しない',cls:'no',action:()=>{pendingLoot=null;addLog(`${item.name}を見送った。`);render();newEnemy()}}
+ ],`<div class="item-card"><div class="big">${slotIcons[item.type]} ${item.name}${item.boss?' ★ボス報酬':''}</div><div class="detail">${statsText}</div><div class="detail" style="margin-top:8px">${oldText}</div><div class="detail" style="margin-top:10px;line-height:1.8">${compareGear(item,current)}</div><div class="notice">緑：装備すると上昇　赤：装備すると低下</div></div>`);
+}
+function showModal(title,desc,buttons,extra=''){
+ const root=$('modalRoot');root.innerHTML=`<div class="modal-back"><div class="modal"><h2>${title}</h2><p>${desc}</p>${extra}<div class="modal-actions">${buttons.map((b,i)=>`<button data-i="${i}" class="${b.cls}">${b.label}</button>`).join('')}</div></div></div>`;
+ root.querySelectorAll('button').forEach((btn,i)=>btn.onclick=()=>{const action=buttons[i].action;root.innerHTML='';action()});
+}
+$('fightBtn').addEventListener('click',fight);
+$('statusBtn').addEventListener('click',()=>{
+ const s=totalStats();
+ const baseText=k=>`${base[k]}（${initial[k]}×${base[k]/initial[k]}）`;
+ showModal('📊 能力値',`<strong>初期パラメータ</strong><br>体力 ${baseText('hp')} / 攻撃力 ${baseText('atk')} / 防御力 ${baseText('def')} / 素早さ ${baseText('spd')}<br><br><strong>装備込み</strong><br>体力 ${s.hp} / 攻撃力 ${s.atk} / 防御力 ${s.def} / 素早さ ${s.spd}<br><br>素早さが高い側が先に攻撃します。ダメージは攻撃力と防御力をもとに算出します。`,[{label:'閉じる',cls:'yes',action:()=>{}}]);
+});
+const hadSave=loadGame();
+window.addEventListener('pagehide',saveGame);
+window.addEventListener('beforeunload',saveGame);
+render();
+if(pendingLoot){showLoot(pendingLoot)}
+else if(cleared&&floor===1000){showClearModal()}
+else if(!enemy){newEnemy()}
+})();
+</script>
+</body>
+</html>
