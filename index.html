@@ -20,7 +20,7 @@ header{display:flex;justify-content:space-between;align-items:center;min-height:
 .arena.biome-desert{background:radial-gradient(ellipse at 50% 85%,#e0b76a 0%,#a66d43 38%,#513a38 78%)}
 .arena:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,#0c1423aa),repeating-linear-gradient(90deg,transparent 0 45px,#ffffff08 46px 47px);pointer-events:none}
 .moon{position:absolute;right:12%;top:12%;width:42px;height:42px;border-radius:50%;background:#f6e9b8;box-shadow:0 0 28px #f6e9b866}
-.enemy-icon{position:relative;z-index:1;font-size:clamp(62px,12vh,100px);line-height:1.15;filter:drop-shadow(0 8px 5px #0008);transition:transform .2s}
+.enemy-icon{position:relative;z-index:1;font-size:clamp(62px,12vh,100px);line-height:1.15;transition:transform .2s}
 .enemy-icon img{display:block;width:clamp(70px, 15vh, 130px);height:clamp(70px, 15vh, 130px);object-fit:contain;border-radius:12px;filter:drop-shadow(0 8px 5px #0008)}
 .enemy-icon.hit{animation:hit .18s}@keyframes hit{50%{transform:translateX(8px) rotate(5deg);filter:brightness(1.8)}}
 .enemy-name{position:relative;z-index:1;font-weight:800;font-size:16px;text-shadow:0 2px 4px #000}
