@@ -213,7 +213,7 @@ const enemyTypes=[
  ['ダークナイト','enemy-29.png','攻撃力',0.95,1.35,1.0,1.1],
  ['ドラゴン','enemy-30.png','体力',1.2,1.2,1.1,1.1]
 ];
-const slotNames={weapon:'武器',armor:'防具',acc1:'アクセサリー1',acc2:'アクセサリー2'};
+const slotNames={weapon:'武器',armor:'防具',acc1:'魔道具',acc2:'聖遺物'};
 const slotIcons={weapon:'⚔️',armor:'🛡️',acc1:'💍',acc2:'📿'};
 const initial={hp:100,atk:12,def:5,spd:10};
 const SAVE_KEY='infiniteTowerGameSaveV1';
@@ -241,7 +241,7 @@ function totalStats(){let s={...base};Object.values(gear).forEach(g=>{if(g)Objec
 function addLog(msg,kind=''){logs.push({msg,kind});logs=logs.slice(-3);renderLogs();saveGame()}
 function renderLogs(){ $('logs').innerHTML=logs.map(x=>typeof x==='string'?`<div class="log">${x}</div>`:`<div class="log ${x.kind}">${x.msg}</div>`).join('')}
 function makeEnemy(){
- const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.0315;
+ const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.031;
  const mult=boss?1.5:1;
  const stats={hp:Math.max(1,ceil(26*scale*t[3]*mult)),atk:Math.max(1,ceil(7*scale*t[4]*mult)),def:Math.max(0,ceil(3*scale*t[5]*mult)),spd:Math.max(1,ceil(6*scale*t[6]*mult))};
  return {name:t[0],icon:t[1],trait:t[2],stats,hp:stats.hp,maxHp:stats.hp,boss};
@@ -253,12 +253,13 @@ function makeGear(bossReward=false, rewardFloor=floor){
  const roll=()=>Math.max(1,ceil(rand(1,4)*power*(boss?1.2:1)));
  if(type==='weapon'){stats.atk=roll()+ceil(power*1.5);stats.spd=roll()+ceil(power);stats.hp=roll();stats.def=roll()}
  else if(type==='armor'){stats.hp=roll()*3+ceil(power*2);stats.def=roll()+ceil(power*1.5);stats.atk=roll();stats.spd=roll()}
- else {stats.hp=roll()+ceil(power*.6);stats.atk=roll();stats.def=roll();stats.spd=roll()}
+ else if(type==='acc1'){stats.hp=roll()+ceil(power*.6);stats.atk=roll()+ceil(power);stats.def=roll();stats.spd=roll()+ceil(power)}
+ else {stats.hp=roll()+ceil(power*.6);stats.atk=roll();stats.def=roll()+ceil(power);stats.spd=roll()}
  Object.keys(stats).forEach(k=>stats[k]=Math.max(0,stats[k]));
  return {type,name:`${['古びた','旅人の','鋼の','精霊の','覇者の'][Math.min(4,Math.floor((rewardFloor-1)/200))]}${slotNames[type]}`,stats,floor:rewardFloor,boss};
 }
 function fmtStats(s){return `HP +${s.hp} / 攻 +${s.atk} / 防 +${s.def} / 速 +${s.spd}`}
-function renderGear(){ $('equipGrid').innerHTML=Object.keys(gear).map(k=>{let g=gear[k];return `<div class="equip"><div class="slot">${slotIcons[k]} ${slotNames[k]}</div><div class="item">${g?g.name:'なし'}</div><div class="stats">${g?`HP+${g.stats.hp} 攻+${g.stats.atk} 防+${g.stats.def} 速+${g.stats.spd}`:'効果なし'}</div></div>`}).join('')}
+function renderGear(){ $('equipGrid').innerHTML=Object.keys(gear).map(k=>{let g=gear[k];return `<div class="equip"><div class="slot">${slotIcons[k]} ${slotNames[k]}</div><div class="item">${g?g.name+(g.boss?' ☆':''):'なし'}</div><div class="stats">${g?`HP+${g.stats.hp} 攻+${g.stats.atk} 防+${g.stats.def} 速+${g.stats.spd}`:'効果なし'}</div></div>`}).join('')}
 function compareGear(item,current){
  const labels={hp:'HP',atk:'攻撃',def:'防御',spd:'素早さ'};
  return Object.keys(labels).map(k=>{
@@ -291,7 +292,11 @@ function render(){
  renderGear();
 }
 function newEnemy(){playerHp=totalStats().hp;enemy=makeEnemy();render();addLog(`${enemy.boss?'ボス':'敵'}「${enemy.name}」が現れた。`)}
-function attackDamage(atk,def){return Math.max(1,atk-Math.floor(def*.55)+rand(-2,2))}
+function attackDamage(atk,def){
+  // 攻撃力に比例してダメージの振れ幅も拡大（攻撃力の±10%、最低1）
+  const variance=Math.max(1,ceil(atk*0.1));
+  return Math.max(1,atk-Math.floor(def*.55)+rand(-variance,variance));
+}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function fight(){
  if(fighting||!enemy||playerHp<=0)return;
