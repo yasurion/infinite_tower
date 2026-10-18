@@ -21,6 +21,7 @@ header{display:flex;justify-content:space-between;align-items:center;min-height:
 .arena:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,#0c1423aa),repeating-linear-gradient(90deg,transparent 0 45px,#ffffff08 46px 47px);pointer-events:none}
 .moon{position:absolute;right:12%;top:12%;width:42px;height:42px;border-radius:50%;background:#f6e9b8;box-shadow:0 0 28px #f6e9b866}
 .enemy-icon{position:relative;z-index:1;font-size:clamp(62px,12vh,100px);line-height:1.15;filter:drop-shadow(0 8px 5px #0008);transition:transform .2s}
+.enemy-icon img{display:block;width:clamp(110px,25vh,210px);height:clamp(110px,25vh,210px);object-fit:contain;border-radius:12px;filter:drop-shadow(0 8px 5px #0008)}
 .enemy-icon.hit{animation:hit .18s}@keyframes hit{50%{transform:translateX(8px) rotate(5deg);filter:brightness(1.8)}}
 .enemy-name{position:relative;z-index:1;font-weight:800;font-size:16px;text-shadow:0 2px 4px #000}
 .boss-tag{color:#ffb4b4;font-size:11px;font-weight:900;letter-spacing:.15em}
@@ -181,16 +182,36 @@ header{display:flex;justify-content:space-between;align-items:center;min-height:
 (()=>{
 const $=id=>document.getElementById(id);
 const enemyTypes=[
- ['迷い狼','🐺','素早さ',.82,.92,.78,1.35],['岩トカゲ','🦎','防御力',.95,.82,1.4,.8],['森のスライム','🟢','体力',1.35,.75,.9,.7],
- ['山賊','🗡️','攻撃力',.9,1.3,.8,1],['骸骨剣士','💀','攻撃力',.85,1.25,1.05,.95],['毒キノコ','🍄','体力',1.2,.85,1.05,.8],
- ['洞窟コウモリ','🦇','素早さ',.75,.9,.75,1.45],['鉄ゴーレム','🗿','防御力',1.15,.9,1.5,.55],['炎の精','🔥','攻撃力',.8,1.4,.75,1.15],
- ['沼のオーガ','👹','体力',1.35,1.15,1.05,.65],['氷狼','🐺','素早さ',.85,1.05,.9,1.3],['呪いの本','📕','攻撃力',.8,1.4,.85,.9],
- ['砂漠サソリ','🦂','防御力',.9,1.05,1.35,1.05],['幽霊','👻','素早さ',.8,1.1,.7,1.4],['ミミック','🧰','体力',1.3,1.1,1.1,.75],
- ['大角の獣','🐗','攻撃力',1.05,1.35,.95,.85],['深海クラゲ','🪼','体力',1.25,.85,1.0,.85],['闇の騎士','🛡️','防御力',.95,1.15,1.45,.8],
- ['砂嵐の魔人','🌪️','素早さ',.85,1.15,.8,1.35],['毒蛇','🐍','攻撃力',.8,1.25,.85,1.25],['宝石虫','🪲','防御力',.95,1.0,1.4,.9],
- ['魔法使い','🧙','攻撃力',.8,1.45,.75,1.05],['巨大カニ','🦀','防御力',1.1,1.0,1.5,.7],['ワイバーン','🐉','体力',1.15,1.25,1.0,1.05],
- ['雷鳥','🦅','素早さ',.85,1.2,.85,1.4],['呪われた鎧','⚔️','防御力',1.0,1.1,1.5,.8],['深淵の目','👁️','攻撃力',.85,1.4,.9,1.1],
- ['古代樹','🌳','体力',1.4,1.0,1.2,.65],['悪魔','😈','攻撃力',.95,1.35,1.0,1.1],['塔の番犬','🐲','体力',1.2,1.2,1.1,1.1]
+ ['スライム','enemy-01.png','素早さ',0.82,0.92,0.78,1.35],
+ ['ゴブリン','enemy-02.png','防御力',0.95,0.82,1.4,0.8],
+ ['マンドラゴラ','enemy-03.png','体力',1.35,0.75,0.9,0.7],
+ ['ロックゴーレム','enemy-04.png','防御力',0.9,1.0,1.35,0.8],
+ ['コウモリ','enemy-05.png','素早さ',0.8,0.9,0.8,1.4],
+ ['スケルトン','enemy-06.png','攻撃力',0.85,1.25,1.05,0.95],
+ ['ウルフ','enemy-07.png','素早さ',0.75,0.9,0.75,1.45],
+ ['アイススライム','enemy-08.png','防御力',1.15,0.9,1.5,0.55],
+ ['ファイアウィスプ','enemy-09.png','攻撃力',0.8,1.4,0.75,1.15],
+ ['フラワーモンスター','enemy-10.png','体力',1.35,1.15,1.05,0.65],
+ ['イノシシ','enemy-11.png','攻撃力',0.85,1.05,0.9,1.0],
+ ['インプ','enemy-12.png','攻撃力',0.8,1.4,0.85,0.9],
+ ['クラゲ','enemy-13.png','防御力',0.9,1.05,1.35,1.05],
+ ['ストーンナイト','enemy-14.png','素早さ',0.8,1.1,1.3,0.7],
+ ['ポイズンマッシュ','enemy-15.png','体力',1.3,1.1,1.1,0.75],
+ ['ハーピー','enemy-16.png','攻撃力',1.05,1.35,0.95,0.85],
+ ['リザード','enemy-17.png','体力',1.25,0.85,1.0,0.85],
+ ['アイスウルフ','enemy-18.png','防御力',0.95,1.15,1.45,0.8],
+ ['スライムキング','enemy-19.png','素早さ',0.85,1.15,0.8,1.35],
+ ['スケルトンアーチャー','enemy-20.png','攻撃力',0.8,1.25,0.85,1.25],
+ ['プラントモンスター','enemy-21.png','防御力',0.95,1.0,1.4,0.9],
+ ['マグマゴーレム','enemy-22.png','攻撃力',0.8,1.45,0.75,1.05],
+ ['スノーゴーレム','enemy-23.png','防御力',1.1,1.0,1.5,0.7],
+ ['ダークバット','enemy-24.png','体力',1.15,1.25,1.0,1.05],
+ ['ウィザード','enemy-25.png','素早さ',0.85,1.2,0.85,1.4],
+ ['アーマービートル','enemy-26.png','防御力',1.0,1.1,1.5,0.8],
+ ['サンドワーム','enemy-27.png','攻撃力',0.85,1.4,0.9,1.1],
+ ['グリフォン','enemy-28.png','体力',1.4,1.0,1.2,0.65],
+ ['ダークナイト','enemy-29.png','攻撃力',0.95,1.35,1.0,1.1],
+ ['ドラゴン','enemy-30.png','体力',1.2,1.2,1.1,1.1]
 ];
 const slotNames={weapon:'武器',armor:'防具',acc1:'アクセサリー1',acc2:'アクセサリー2'};
 const slotIcons={weapon:'⚔️',armor:'🛡️',acc1:'💍',acc2:'📿'};
@@ -257,7 +278,7 @@ function render(){
 
  if(enemy){
   $('enemyIcon').style.display='';$('enemyName').style.display='';$('bossTag').style.display='';$('enemyHpWrap').style.display='';
-  $('enemyIcon').textContent=enemy.icon;$('enemyName').textContent=enemy.name;
+  if(typeof enemy.icon==='string'&&enemy.icon.startsWith('enemy-')){$('enemyIcon').innerHTML=`<img src="tower_assets/${enemy.icon}" alt="" draggable="false">`;}else{$('enemyIcon').textContent=enemy.icon;}$('enemyName').textContent=enemy.name;
   $('bossTag').textContent=enemy.boss?'★ BOSS ★':'';
   $('enemyHpText').textContent=`${Math.max(0,enemy.hp)} / ${enemy.maxHp}`;
   $('enemyHpBar').style.width=`${Math.max(0,enemy.hp)/enemy.maxHp*100}%`;
