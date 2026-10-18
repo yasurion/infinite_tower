@@ -241,7 +241,7 @@ function totalStats(){let s={...base};Object.values(gear).forEach(g=>{if(g)Objec
 function addLog(msg,kind=''){logs.push({msg,kind});logs=logs.slice(-3);renderLogs();saveGame()}
 function renderLogs(){ $('logs').innerHTML=logs.map(x=>typeof x==='string'?`<div class="log">${x}</div>`:`<div class="log ${x.kind}">${x.msg}</div>`).join('')}
 function makeEnemy(){
- const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.0221;
+ const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.0315;
  const mult=boss?1.5:1;
  const stats={hp:Math.max(1,ceil(26*scale*t[3]*mult)),atk:Math.max(1,ceil(7*scale*t[4]*mult)),def:Math.max(0,ceil(3*scale*t[5]*mult)),spd:Math.max(1,ceil(6*scale*t[6]*mult))};
  return {name:t[0],icon:t[1],trait:t[2],stats,hp:stats.hp,maxHp:stats.hp,boss};
