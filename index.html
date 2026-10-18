@@ -205,29 +205,38 @@ function makeGear(bossReward=false, rewardFloor=floor){
  const types=['weapon','armor','acc1','acc2'], type=types[rand(0,3)], level=1+(rewardFloor-1)*.009, boss=bossReward;
  const power=1+(rewardFloor-1)*.021, multiplier=boss?1.2:1;
  let stats={hp:0,atk:0,def:0,spd:0};
- // 装備値は1000段階で抽選する。
- // 従来の最小値と中央値を維持し、最大値は定義時点で従来値の5倍にする。
- // 前半500段階は最小値～中央値、後半500段階は中央値～拡張後最大値。
- const rollRange=(min,median,max)=>{
-  const step=rand(1,1000);
-  if(step<=500){
-   return min+Math.floor((step-1)*(median-min+1)/500);
+ // 装備値は1000段階の指数分布で抽選する。
+ // 全段階を一括で扱い、値が高い段階ほど出現率が指数関数的に低くなる。
+ // 最小値・最大値は維持し、最大値は従来値の5倍として定義する。
+ const rollRange=(min,max)=>{
+  const stageCount=1000;
+  const maxStage=stageCount-1;
+  const randomStage=rand(0,maxStage);
+  const pivotStage=800;
+  // 499階の武器攻撃力（最小30・最大248）が、段階800で50になるよう
+  // 中間点を全パラメータ共通で「範囲の約9.1743%」に設定する。
+  const pivotRatio=20/218;
+
+  if(randomStage===maxStage)return max;
+  let ratio;
+  if(randomStage<=pivotStage){
+   // 前半は低い値に集まりやすい緩やかな指数曲線
+   const t=randomStage/pivotStage;
+   const curvature=0.35;
+   ratio=pivotRatio*(Math.expm1(curvature*t)/Math.expm1(curvature));
+  }else{
+   // 段階800以降は指数的に急上昇し、最大段階で最大値に到達
+   const t=(randomStage-pivotStage)/(maxStage-pivotStage);
+   const curvature=4;
+   ratio=pivotRatio+(1-pivotRatio)*(Math.expm1(curvature*t)/Math.expm1(curvature));
   }
-  return median+Math.floor((step-501)*(max-median+1)/500);
+  return min+Math.floor(ratio*(max-min));
  };
  const baseMin=Math.max(1,ceil(power*multiplier));
  const baseMaxBeforeExpansion=Math.max(1,ceil(4*power*multiplier));
  const baseMax=baseMaxBeforeExpansion*5;
- const roll=(bonus=0)=>{
-  const min=baseMin+bonus;
-  const median=Math.floor((baseMin+baseMaxBeforeExpansion)/2)+bonus;
-  return rollRange(min,median,baseMax+bonus);
- };
- const armorHp=(bonus=0)=>{
-  const min=baseMin*3+bonus;
-  const median=Math.floor((baseMin*3+baseMaxBeforeExpansion*3)/2)+bonus;
-  return rollRange(min,median,baseMax*3+bonus);
- };
+ const roll=(bonus=0)=>rollRange(baseMin+bonus,baseMax+bonus);
+ const armorHp=(bonus=0)=>rollRange(baseMin*3+bonus,baseMax*3+bonus);
  if(type==='weapon'){stats.atk=roll(ceil(power*1.5));stats.spd=roll(ceil(power));stats.hp=roll();stats.def=roll()}
  else if(type==='armor'){stats.hp=armorHp(ceil(power*2));stats.def=roll(ceil(power*1.5));stats.atk=roll();stats.spd=roll()}
  else if(type==='acc1'){stats.hp=roll(ceil(power*.6));stats.atk=roll(ceil(power));stats.def=roll();stats.spd=roll(ceil(power))}
