@@ -131,15 +131,24 @@ header{display:flex;justify-content:space-between;align-items:center;min-height:
 
 /* 修正：iPhoneでは戦闘画面全体（敵エリア＋ログ）により多くの高さを割り当て、内部の敵エリアも広げる */
 @media(max-width:600px){
- .battle{flex:1.15;min-height:0}
- .command{flex:.85;min-height:0}
+ .battle{flex:1.25;min-height:0}
+ .command{flex:.75;min-height:0}
  .arena{flex:4.5;min-height:0}
+ .log-area{min-height:calc(64px + 18px)}
 }
 @media(max-width:600px) and (max-height:700px){
- .battle{flex:1.05;min-height:0}
- .command{flex:.95;min-height:0}
+ .battle{flex:1.15;min-height:0}
+ .command{flex:.85;min-height:0}
  .arena{flex:4.1;min-height:0}
+ .log-area{min-height:calc(60px + 16px)}
 }
+
+/* 能力値ダイアログ内のセーブデータ消去 */
+.status-modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.status-modal-head h2{margin:0;flex:1}
+.clear-save-btn{flex:0 0 auto;background:#8f343d;color:#fff;border:1px solid #d66b75;border-radius:8px;padding:8px 9px;font-size:11px;font-weight:800;line-height:1.2}
+@media(max-width:380px){.status-modal-head{gap:6px}.clear-save-btn{font-size:10px;padding:7px 6px}}
+
 </style>
 </head>
 <body>
@@ -330,11 +339,15 @@ function showModal(title,desc,buttons,extra=''){
  root.querySelectorAll('button').forEach((btn,i)=>btn.onclick=()=>{const action=buttons[i].action;root.innerHTML='';action()});
 }
 $('fightBtn').addEventListener('click',fight);
-$('statusBtn').addEventListener('click',()=>{
+function showStatusModal(){
  const s=totalStats();
  const baseText=k=>`${base[k]}（${initial[k]}×${base[k]/initial[k]}）`;
- showModal('📊 能力値',`<strong>初期パラメータ</strong><br>体力 ${baseText('hp')} / 攻撃力 ${baseText('atk')} / 防御力 ${baseText('def')} / 素早さ ${baseText('spd')}<br><br><strong>装備込み</strong><br>体力 ${s.hp} / 攻撃力 ${s.atk} / 防御力 ${s.def} / 素早さ ${s.spd}<br><br>素早さが高い側が先に攻撃します。ダメージは攻撃力と防御力をもとに算出します。`,[{label:'閉じる',cls:'yes',action:()=>{}}]);
-});
+ const root=$('modalRoot');
+ root.innerHTML=`<div class="modal-back"><div class="modal status-modal"><div class="status-modal-head"><h2>📊 能力値</h2><button type="button" class="clear-save-btn" id="clearSaveBtn">セーブデータ消去</button></div><p><strong>初期パラメータ</strong><br>体力 ${baseText('hp')} / 攻撃力 ${baseText('atk')} / 防御力 ${baseText('def')} / 素早さ ${baseText('spd')}<br><br><strong>装備込み</strong><br>体力 ${s.hp} / 攻撃力 ${s.atk} / 防御力 ${s.def} / 素早さ ${s.spd}<br><br>素早さが高い側が先に攻撃します。ダメージは攻撃力と防御力をもとに算出します。</p><div class="modal-actions"><button class="yes" id="closeStatusBtn">閉じる</button></div></div></div>`;
+ $('closeStatusBtn').onclick=()=>{root.innerHTML=''};
+ $('clearSaveBtn').onclick=()=>showModal('セーブデータを消去','セーブデータを本当に削除しますか？これまでの階層・能力値・装備などが初期状態に戻ります。',[{label:'いいえ',cls:'no',action:()=>showStatusModal()},{label:'はい、削除する',cls:'yes',action:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){} base={...initial};floor=1;playerHp=initial.hp;enemy=null;cleared=false;clearCount=0;bonusLabel='なし';gear=emptyGear();logs=[...defaultLogs];fighting=false;fightToken++;pendingLoot=null;root.innerHTML='';render();}}]);
+}
+$('statusBtn').addEventListener('click',showStatusModal);
 const hadSave=loadGame();
 window.addEventListener('pagehide',saveGame);
 window.addEventListener('beforeunload',saveGame);
