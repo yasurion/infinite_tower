@@ -4,10 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#17243b">
-<title>無限階層の塔</title>
+<title>終末の塔</title>
 <style>
 :root{--bg:#101827;--panel:#1b2940;--panel2:#243651;--gold:#ffd166;--text:#f3f6fb;--muted:#a9b7ca;--red:#ff7272;--green:#70e1a1}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+/* iPhone Safariなどでのダブルタップによる意図しない拡大を抑制 */
+html,body,button{touch-action:manipulation}
 body{overflow:hidden}.app{height:100dvh;max-width:760px;margin:auto;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);gap:8px}
 header{display:flex;justify-content:space-between;align-items:center;min-height:42px;gap:8px}h1{font-size:18px;margin:0;letter-spacing:.04em}.floor{font-size:14px;color:var(--gold);font-weight:800;white-space:nowrap}
 .battle{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid #344660;border-radius:16px;overflow:hidden;background:#18253a}
