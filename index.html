@@ -43,105 +43,53 @@ header{display:flex;justify-content:space-between;align-items:center;min-height:
 .modal h2{font-size:18px;margin:0 0 8px}.modal p{font-size:13px;color:#c0cede;line-height:1.5;margin:8px 0 14px}
 .item-card{background:#111d2e;border:1px solid #405571;border-radius:10px;padding:12px;margin:10px 0}.item-card .big{font-size:15px;font-weight:850}.item-card .detail{font-size:12px;color:#bad3ef;margin-top:5px}.modal-actions{display:flex;gap:8px;margin-top:14px}.modal-actions button{flex:1;border-radius:10px;padding:12px 8px;border:0;font-weight:800}.yes{background:#ffd166;color:#35260c}.no{background:#354761;color:white}
 .notice{font-size:11px;color:#a9b7ca;text-align:center;margin-top:8px}
-@media(min-height:800px){.app{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom));gap:10px}.arena{flex:3.423}.log-area{flex:.455}.command{gap:10px}.equip{padding:8px 10px}.equip .item{font-size:12px}}
-@media(max-height:650px){header{min-height:30px}h1{font-size:16px}.arena{flex:2.535}.log-area{min-height:54px;padding:5px 8px}.logs{font-size:10px;gap:2px}.fight{padding:9px;font-size:16px}.equipment{padding:6px 8px}.equip{padding:5px 7px}.player-stats{padding:6px 8px}}
-/* 縦画面：戦闘表示を少し詰め、ログと装備の文字を読みやすくする */
-@media(max-width:600px) and (max-height:850px){
- .battle{flex:.9;min-height:0}
- .command{flex:1.1;min-height:0;gap:5px}
- .arena{flex:2.1;gap:3px;padding:4px 0;justify-content:center}
- .enemy-icon{font-size:clamp(42px,7.5vh,68px);line-height:1;flex:0 0 auto}
+/* PC・横幅の広い画面向け：高さに応じた調整 */
+@media (min-width:601px) and (min-height:800px) {
+ .app{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom));gap:10px}
+ .arena{flex:3.423}
+ .log-area{flex:.455}
+ .command{gap:10px}
+ .equip{padding:8px 10px}
+ .equip .item{font-size:12px}
+}
+@media (min-width:601px) and (max-height:650px) {
+ header{min-height:30px}
+ h1{font-size:16px}
+ .arena{flex:2.535}
+ .log-area{min-height:54px;padding:5px 8px}
+ .logs{font-size:10px;gap:2px}
+ .fight{padding:9px;font-size:16px}
+ .equipment{padding:6px 8px}
+ .equip{padding:5px 7px}
+ .player-stats{padding:6px 8px}
+}
+
+/* スマートフォン向けレイアウト：画面の高さに依存せず、この1か所で管理 */
+@media (max-width:600px) {
+ .app{gap:6px}
+ header{min-height:30px}
+ h1{font-size:16px}
+ .battle{flex:1.25;min-height:0}
+ .command{flex:.75;min-height:0;gap:5px}
+ .arena{flex:4.5;min-height:0;gap:3px;padding:4px 0;justify-content:center}
+ .enemy-icon{font-size:clamp(48px,11vh,100px);line-height:1;flex:0 0 auto}
  .enemy-name{font-size:14px;line-height:1.15;flex:0 0 auto}
  .boss-tag{font-size:10px;line-height:1;letter-spacing:.1em;flex:0 0 auto}
  .hp-wrap{padding:4px 8px;font-size:11px;flex:0 0 auto}
  .hp-label{margin-bottom:3px}
- .log-area{flex:.85;min-height:64px;padding:6px 8px;justify-content:center}
- .log-title{font-size:11px;margin-bottom:3px}
- .logs{font-size:12px;line-height:1.25;gap:2px}
- .log{min-height:15px}
- .equipment{padding:7px 8px}
- .equip-title{font-size:13px;margin-bottom:5px}
- .equip{padding:5px 7px}
- .equip .slot{font-size:11px}
- .equip .item{font-size:12px}
- .equip .stats{font-size:11px}
-}
-@media(max-width:600px) and (max-height:700px){
- header{min-height:26px}h1{font-size:15px}.arena{flex:1.8;gap:2px;padding:3px 0}
- .enemy-icon{font-size:clamp(36px,6.5vh,54px)}
- .hp-wrap{padding:3px 7px}.bar{height:6px}
- .log-area{flex:.9;min-height:54px;padding:4px 7px}
- .logs{font-size:11px;line-height:1.2;gap:1px}
- .player-stats{padding:5px 7px}.fight{padding:7px;font-size:15px}
- .equipment{padding:5px 7px}.equip-title{margin-bottom:4px}.equip{padding:4px 6px}
- .equip .item{font-size:11px}.equip .stats{font-size:10px}
-}
-
-/* iPhone向け追加調整：ログ・装備文字をさらに拡大し、戦闘表示の高さを抑える */
-@media(max-width:600px){
+ .log-area{flex:.85;min-height:82px;padding:6px 8px;justify-content:center}
  .log-title{font-size:12px}
- .logs{font-size:14px;line-height:1.3;gap:3px}
- .log{min-height:18px}
- .player-stats{font-size:12px}
- .equip-title{font-size:14px}
- .equip .slot{font-size:12px}
- .equip .item{font-size:13px}
- .equip .stats{font-size:12px}
- .equipment{padding:7px 8px}
- .equip{padding:6px 7px}
- .battle{flex:.78}
- .command{flex:1.22}
- .arena{flex:2.625}
- .enemy-icon{font-size:clamp(60px,11vh,100px)}
-}
-@media(max-width:600px) and (max-height:700px){
- .logs{font-size:13px;line-height:1.2;gap:2px}
+ .logs{font-size:13px;line-height:1.25;gap:2px}
  .log{min-height:16px}
- .log-area{min-height:60px;padding:5px 7px}
- .arena{flex:2.175;gap:2px;padding:2px 0}
- .enemy-icon{font-size:clamp(48px,8.7vh,75px)}
- .enemy-name{font-size:13px}
- .boss-tag{font-size:10px}
- .hp-wrap{font-size:11px;padding:3px 7px}
- .equip-title{font-size:13px}
- .equip .slot{font-size:11px}
- .equip .item{font-size:12px}
- .equip .stats{font-size:11px}
- .equipment{padding:5px 6px}
- .equip{padding:4px 5px}
- .player-stats{font-size:11px}
-}
-
-/* 最新調整：iPhoneでは戦闘フィールドを1.5倍の比率で広げ、装備文字も拡大 */
-@media(max-width:600px){
- .arena{flex:3.9375}
- .enemy-icon{font-size:clamp(72px,16.5vh,150px)}
- .equip-title{font-size:16px}
- .equip .slot{font-size:13px}
- .equip .item{font-size:15px}
- .equip .stats{font-size:13px}
-}
-@media(max-width:600px) and (max-height:700px){
- .arena{flex:3.2625}
- .enemy-icon{font-size:clamp(54px,13vh,112px)}
- .equip-title{font-size:15px}
+ .player-stats{font-size:12px;padding:6px 8px}
+ .fight{padding:9px;font-size:16px}
+ .equipment{padding:6px 7px}
+ .equip-title{font-size:15px;margin-bottom:4px}
+ .equip{padding:5px 6px}
  .equip .slot{font-size:12px}
  .equip .item{font-size:14px}
  .equip .stats{font-size:12px}
-}
-
-/* 修正：iPhoneでは戦闘画面全体（敵エリア＋ログ）により多くの高さを割り当て、内部の敵エリアも広げる */
-@media(max-width:600px){
- .battle{flex:1.25;min-height:0}
- .command{flex:.75;min-height:0}
- .arena{flex:4.5;min-height:0}
- .log-area{min-height:calc(64px + 18px)}
-}
-@media(max-width:600px) and (max-height:700px){
- .battle{flex:1.15;min-height:0}
- .command{flex:.85;min-height:0}
- .arena{flex:4.1;min-height:0}
- .log-area{min-height:calc(60px + 16px)}
+ .bar{height:6px}
 }
 
 /* 能力値ダイアログ内のセーブデータ消去 */
@@ -237,24 +185,53 @@ function loadGame(){
 }
 const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const ceil=Math.ceil;
-function totalStats(){let s={...base};Object.values(gear).forEach(g=>{if(g)Object.keys(s).forEach(k=>s[k]+=g.stats[k]||0)});return s}
+function totalStats(){
+ const total={...base};
+ for(const item of Object.values(gear)){
+  if(!item?.stats)continue;
+  for(const key of Object.keys(total)) total[key]+=(Number(item.stats[key])||0);
+ }
+ return total;
+}
 function addLog(msg,kind=''){logs.push({msg,kind});logs=logs.slice(-3);renderLogs();saveGame()}
 function renderLogs(){ $('logs').innerHTML=logs.map(x=>typeof x==='string'?`<div class="log">${x}</div>`:`<div class="log ${x.kind}">${x.msg}</div>`).join('')}
 function makeEnemy(){
- const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.031;
+ const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.029;
  const mult=boss?1.5:1;
  const stats={hp:Math.max(1,ceil(26*scale*t[3]*mult)),atk:Math.max(1,ceil(7*scale*t[4]*mult)),def:Math.max(0,ceil(3*scale*t[5]*mult)),spd:Math.max(1,ceil(6*scale*t[6]*mult))};
  return {name:t[0],icon:t[1],trait:t[2],stats,hp:stats.hp,maxHp:stats.hp,boss};
 }
 function makeGear(bossReward=false, rewardFloor=floor){
  const types=['weapon','armor','acc1','acc2'], type=types[rand(0,3)], level=1+(rewardFloor-1)*.009, boss=bossReward;
- const power=1+(rewardFloor-1)*.021;
+ const power=1+(rewardFloor-1)*.021, multiplier=boss?1.2:1;
  let stats={hp:0,atk:0,def:0,spd:0};
- const roll=()=>Math.max(1,ceil(rand(1,4)*power*(boss?1.2:1)));
- if(type==='weapon'){stats.atk=roll()+ceil(power*1.5);stats.spd=roll()+ceil(power);stats.hp=roll();stats.def=roll()}
- else if(type==='armor'){stats.hp=roll()*3+ceil(power*2);stats.def=roll()+ceil(power*1.5);stats.atk=roll();stats.spd=roll()}
- else if(type==='acc1'){stats.hp=roll()+ceil(power*.6);stats.atk=roll()+ceil(power);stats.def=roll();stats.spd=roll()+ceil(power)}
- else {stats.hp=roll()+ceil(power*.6);stats.atk=roll();stats.def=roll()+ceil(power);stats.spd=roll()}
+ // 装備値は1000段階で抽選する。
+ // 従来の最小値と中央値を維持し、最大値は定義時点で従来値の5倍にする。
+ // 前半500段階は最小値～中央値、後半500段階は中央値～拡張後最大値。
+ const rollRange=(min,median,max)=>{
+  const step=rand(1,1000);
+  if(step<=500){
+   return min+Math.floor((step-1)*(median-min+1)/500);
+  }
+  return median+Math.floor((step-501)*(max-median+1)/500);
+ };
+ const baseMin=Math.max(1,ceil(power*multiplier));
+ const baseMaxBeforeExpansion=Math.max(1,ceil(4*power*multiplier));
+ const baseMax=baseMaxBeforeExpansion*5;
+ const roll=(bonus=0)=>{
+  const min=baseMin+bonus;
+  const median=Math.floor((baseMin+baseMaxBeforeExpansion)/2)+bonus;
+  return rollRange(min,median,baseMax+bonus);
+ };
+ const armorHp=(bonus=0)=>{
+  const min=baseMin*3+bonus;
+  const median=Math.floor((baseMin*3+baseMaxBeforeExpansion*3)/2)+bonus;
+  return rollRange(min,median,baseMax*3+bonus);
+ };
+ if(type==='weapon'){stats.atk=roll(ceil(power*1.5));stats.spd=roll(ceil(power));stats.hp=roll();stats.def=roll()}
+ else if(type==='armor'){stats.hp=armorHp(ceil(power*2));stats.def=roll(ceil(power*1.5));stats.atk=roll();stats.spd=roll()}
+ else if(type==='acc1'){stats.hp=roll(ceil(power*.6));stats.atk=roll(ceil(power));stats.def=roll();stats.spd=roll(ceil(power))}
+ else {stats.hp=roll(ceil(power*.6));stats.atk=roll();stats.def=roll(ceil(power));stats.spd=roll()}
  Object.keys(stats).forEach(k=>stats[k]=Math.max(0,stats[k]));
  return {type,name:`${['古びた','旅人の','鋼の','精霊の','覇者の'][Math.min(4,Math.floor((rewardFloor-1)/200))]}${slotNames[type]}`,stats,floor:rewardFloor,boss};
 }
@@ -376,7 +353,6 @@ function showStatusModal(){
 $('statusBtn').addEventListener('click',showStatusModal);
 const hadSave=loadGame();
 window.addEventListener('pagehide',saveGame);
-window.addEventListener('beforeunload',saveGame);
 render();
 if(pendingLoot){showLoot(pendingLoot)}
 else if(cleared&&floor===1000){showClearModal()}
