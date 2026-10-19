@@ -237,12 +237,12 @@ function makeGear(bossReward=false, rewardFloor=floor){
  let highStageCount = 0;
  const rollWithStage = (bonus=0) => {
   const r = rollRange(baseMin+bonus, baseMax+bonus);
-  if(r.stage => pivotStage) highStageCount++;
+  if(r.stage >= pivotStage) highStageCount++;
   return r.val;
  };
  const armorHpWithStage = (bonus=0) => {
   const r = rollRange(baseMin*3+bonus, baseMax*3+bonus);
-  if(r.stage > 800) highStageCount++;
+  if(r.stage >= pivotStage) highStageCount++;
   return r.val;
  };
 
