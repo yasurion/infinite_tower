@@ -103,7 +103,7 @@ header{display:flex;justify-content:space-between;align-items:center;min-height:
 </head>
 <body>
 <div class="app">
-<header><h1>⚔ 無限の塔</h1><div class="floor" id="floor"><span id="clearCount">★0</span>　 第 1 階</div></header>
+<header><h1>⚔ 無限の塔</h1><div class="floor" id="floor"><span id="clearCount">★0</span>  第 1 階</div></header>
 <section class="battle">
   <div class="arena" id="arena">
     <div class="moon"></div>
@@ -208,7 +208,8 @@ function makeGear(bossReward=false, rewardFloor=floor){
  const power=1+(rewardFloor-1)*.021, multiplier=boss?1.2:1;
  let stats={hp:0,atk:0,def:0,spd:0};
  
- const pivotStage=800;
+ const pivotStage = 800;
+ const prefixStage = 900;
 
  const rollRange=(min,max)=>{
   const stageCount=1000;
@@ -237,12 +238,12 @@ function makeGear(bossReward=false, rewardFloor=floor){
  let highStageCount = 0;
  const rollWithStage = (bonus=0) => {
   const r = rollRange(baseMin+bonus, baseMax+bonus);
-  if(r.stage >= pivotStage) highStageCount++; // ⭕ >= に修正
+  if(r.stage >= prefixStage) highStageCount++;
   return r.val;
  };
  const armorHpWithStage = (bonus=0) => {
   const r = rollRange(baseMin*3+bonus, baseMax*3+bonus);
-  if(r.stage >= pivotStage) highStageCount++; // ⭕ >= に修正し、pivotStageを参照できるようにする
+  if(r.stage >= prefixStage) highStageCount++;
   return r.val;
  };
 
@@ -298,7 +299,7 @@ function compareGear(item,current){
 }
 function render(){
  saveGame();
- $('floor').innerHTML=`<span id="clearCount">★${clearCount}</span>　 第 ${floor} 階${enemy?.boss?' · BOSS':''}`;
+ $('floor').innerHTML=`<span id="clearCount">★${clearCount}</span>  第 ${floor} 階${enemy?.boss?' · BOSS':''}`;
  $('playerHpText').textContent=`${Math.max(0,playerHp)} / ${totalStats().hp}`;
  $('playerHpBar').style.width=`${Math.max(0,playerHp)/totalStats().hp*100}%`;
  const biomes=['biome-grass','biome-cave','biome-volcano','biome-forest','biome-snow','biome-desert'];
@@ -385,7 +386,7 @@ function showLoot(item){
  showModal('🎁 装備を獲得！',`敵を倒して装備を見つけた！`,[
   {label:'装備する',cls:'yes',action:()=>{gear[item.type]=item;pendingLoot=null;playerHp=totalStats().hp;addLog(`${item.name}を装備した。`,'good');render();newEnemy()}},
   {label:'装備しない',cls:'no',action:()=>{pendingLoot=null;addLog(`${item.name}を見送った。`);render();newEnemy()}}
- ],`<div class="item-card"><div class="big">${slotIcons[item.type]} ${item.name}${item.boss?' ★ボス報酬':''}</div><div class="detail">${statsText}</div><div class="detail" style="margin-top:8px">${oldText}</div><div class="detail" style="margin-top:10px;line-height:1.8">${compareGear(item,current)}</div><div class="notice">緑：装備すると上昇　赤：装備すると低下</div></div>`);
+ ],`<div class="item-card"><div class="big">${slotIcons[item.type]} ${item.name}${item.boss?' ★ボス報酬':''}</div><div class="detail">${statsText}</div><div class="detail" style="margin-top:8px">${oldText}</div><div class="detail" style="margin-top:10px;line-height:1.8">${compareGear(item,current)}</div><div class="notice">緑：装備すると上昇 赤：装備すると低下</div></div>`);
 }
 function showModal(title,desc,buttons,extra=''){
  const root=$('modalRoot');root.innerHTML=`<div class="modal-back"><div class="modal"><h2>${title}</h2><p>${desc}</p>${extra}<div class="modal-actions">${buttons.map((b,i)=>`<button data-i="${i}" class="${b.cls}">${b.label}</button>`).join('')}</div></div></div>`;
@@ -397,8 +398,7 @@ function showStatusModal(){
  const baseText=k=>`${base[k]}（${initial[k]}×${base[k]/initial[k]}）`;
  const root=$('modalRoot');
  root.innerHTML=`<div class="modal-back"><div class="modal status-modal"><div class="status-modal-head"><h2>📊 能力値</h2><button type="button" class="clear-save-btn" id="clearSaveBtn">セーブデータ消去</button></div><p><strong>初期パラメータ</strong><br>体力 ${baseText('hp')} / 攻撃力 ${baseText('atk')} / 防御力 ${baseText('def')} / 素早さ ${baseText('spd')}<br><br><strong>装備込み</strong><br>体力 ${s.hp} / 攻撃力 ${s.atk} / 防御力 ${s.def} / 素早さ ${s.spd}<br><br>素早さが高い側が先に攻撃します。ダメージは攻撃力と防御力をもとに算出します。</p><div class="modal-actions"><button class="yes" id="closeStatusBtn">閉じる</button></div></div></div>`;
- $('closeStatusBtn').onclick=()=>{root.innerHTML=''};
- $('clearSaveBtn').onclick=()=>showModal('セーブデータを消去','セーブデータを本当に削除しますか？これまでの階層・能力値・装備などが初期状態に戻ります。',[{label:'いいえ',cls:'no',action:()=>showStatusModal()},{label:'はい、削除する',cls:'yes',action:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){} base={...initial};floor=1;playerHp=initial.hp;enemy=null;cleared=false;clearCount=0;bonusLabel='なし';gear=emptyGear();logs=[...defaultLogs];fighting=false;fightToken++;pendingLoot=null;root.innerHTML='';render();}}]);
+ $('closeStatusBtn').onclick=()=>{root.innerHTML=''};$('clearSaveBtn').onclick=()=>showModal('セーブデータを消去','セーブデータを本当に削除しますか？これまでの階層・能力値・装備などが初期状態に戻ります。',[{label:'いいえ',cls:'no',action:()=>showStatusModal()},{label:'はい、削除する',cls:'yes',action:()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){} base={...initial};floor=1;playerHp=initial.hp;enemy=null;cleared=false;clearCount=0;bonusLabel='なし';gear=emptyGear();logs=[...defaultLogs];fighting=false;fightToken++;pendingLoot=null;root.innerHTML='';render();}}]);
 }
 $('statusBtn').addEventListener('click',showStatusModal);
 const hadSave=loadGame();
