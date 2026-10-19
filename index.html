@@ -164,7 +164,7 @@ const enemyTypes=[
 ];
 const slotNames={weapon:'武器',armor:'防具',acc1:'魔道具',acc2:'聖遺物'};
 const slotIcons={weapon:'⚔️',armor:'🛡️',acc1:'💍',acc2:'📿'};
-const initial={hp:100,atk:12,def:5,spd:10};
+const initial={hp:100,atk:10,def:10,spd:10};
 const SAVE_KEY='infiniteTowerGameSaveV1';
 const emptyGear=()=>({weapon:null,armor:null,acc1:null,acc2:null});
 const defaultLogs=['塔の探索が始まった。','敵を倒して上の階を目指そう。','「たたかう」で戦闘開始。'];
@@ -197,8 +197,8 @@ function totalStats(){
 function addLog(msg,kind=''){logs.push({msg,kind});logs=logs.slice(-3);renderLogs();saveGame()}
 function renderLogs(){ $('logs').innerHTML=logs.map(x=>typeof x==='string'?`<div class="log">${x}</div>`:`<div class="log ${x.kind}">${x.msg}</div>`).join('')}
 function makeEnemy(){
- const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.0400;
- const mult=boss?1.5:1;
+ const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.0450;
+ const mult = (floor === 1000) ? (boss ? 2 : 2) : (boss ? 1.5 : 1);
  const stats={hp:Math.max(1,ceil(26*scale*t[3]*mult)),atk:Math.max(1,ceil(7*scale*t[4]*mult)),def:Math.max(0,ceil(3*scale*t[5]*mult)),spd:Math.max(1,ceil(6*scale*t[6]*mult))};
  return {name:t[0],icon:t[1],trait:t[2],stats,hp:stats.hp,maxHp:stats.hp,boss};
 }
