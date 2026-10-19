@@ -198,53 +198,95 @@ function addLog(msg,kind=''){logs.push({msg,kind});logs=logs.slice(-3);renderLog
 function renderLogs(){ $('logs').innerHTML=logs.map(x=>typeof x==='string'?`<div class="log">${x}</div>`:`<div class="log ${x.kind}">${x.msg}</div>`).join('')}
 function makeEnemy(){
  const t=enemyTypes[rand(0,enemyTypes.length-1)], boss=floor%10===0, scale=1+(floor-1)*.0450;
- const mult = (floor === 1000) ? (boss ? 2 : 2) : (boss ? 1.5 : 1);
+ const mult=boss?1.5:1;
  const stats={hp:Math.max(1,ceil(26*scale*t[3]*mult)),atk:Math.max(1,ceil(7*scale*t[4]*mult)),def:Math.max(0,ceil(3*scale*t[5]*mult)),spd:Math.max(1,ceil(6*scale*t[6]*mult))};
  return {name:t[0],icon:t[1],trait:t[2],stats,hp:stats.hp,maxHp:stats.hp,boss};
 }
+
 function makeGear(bossReward=false, rewardFloor=floor){
  const types=['weapon','armor','acc1','acc2'], type=types[rand(0,3)], level=1+(rewardFloor-1)*.009, boss=bossReward;
  const power=1+(rewardFloor-1)*.021, multiplier=boss?1.2:1;
  let stats={hp:0,atk:0,def:0,spd:0};
- // 装備値は1000段階の指数分布で抽選する。
- // 全段階を一括で扱い、値が高い段階ほど出現率が指数関数的に低くなる。
- // 最小値・最大値は維持し、最大値は従来値の5倍として定義する。
+ 
  const rollRange=(min,max)=>{
   const stageCount=1000;
   const maxStage=stageCount-1;
   const randomStage=rand(0,maxStage);
   const pivotStage=800;
-  // 499階の武器攻撃力（最小30・最大248）が、段階800で50になるよう
-  // 中間点を全パラメータ共通で「範囲の約9.1743%」に設定する。
   const pivotRatio=20/218;
 
-  if(randomStage===maxStage)return max;
+  if(randomStage===maxStage)return {val: max, stage: randomStage}; // 段階も一緒に返すように調整
   let ratio;
   if(randomStage<=pivotStage){
-   // 前半は低い値に集まりやすい緩やかな指数曲線
    const t=randomStage/pivotStage;
    const curvature=0.35;
    ratio=pivotRatio*(Math.expm1(curvature*t)/Math.expm1(curvature));
   }else{
-   // 段階800以降は指数的に急上昇し、最大段階で最大値に到達
    const t=(randomStage-pivotStage)/(maxStage-pivotStage);
    const curvature=4;
    ratio=pivotRatio+(1-pivotRatio)*(Math.expm1(curvature*t)/Math.expm1(curvature));
   }
-  return min+Math.floor(ratio*(max-min));
+  return {val: min+Math.floor(ratio*(max-min)), stage: randomStage};
  };
+
  const baseMin=Math.max(1,ceil(power*multiplier));
  const baseMaxBeforeExpansion=Math.max(1,ceil(4*power*multiplier));
  const baseMax=baseMaxBeforeExpansion*5;
- const roll=(bonus=0)=>rollRange(baseMin+bonus,baseMax+bonus);
- const armorHp=(bonus=0)=>rollRange(baseMin*3+bonus,baseMax*3+bonus);
- if(type==='weapon'){stats.atk=roll(ceil(power*1.5));stats.spd=roll(ceil(power));stats.hp=roll();stats.def=roll()}
- else if(type==='armor'){stats.hp=armorHp(ceil(power*2));stats.def=roll(ceil(power*1.5));stats.atk=roll();stats.spd=roll()}
- else if(type==='acc1'){stats.hp=roll(ceil(power*.6));stats.atk=roll(ceil(power));stats.def=roll();stats.spd=roll(ceil(power))}
- else {stats.hp=roll(ceil(power*.6));stats.atk=roll();stats.def=roll(ceil(power));stats.spd=roll()}
+
+ // 各パラメータの乱数ステージ（0〜999）がpivotStageを超えたかを判定するため、stageを保持する
+ let highStageCount = 0;
+ const rollWithStage = (bonus=0) => {
+  const r = rollRange(baseMin+bonus, baseMax+bonus);
+  if(r.stage => pivotStage) highStageCount++;
+  return r.val;
+ };
+ const armorHpWithStage = (bonus=0) => {
+  const r = rollRange(baseMin*3+bonus, baseMax*3+bonus);
+  if(r.stage > 800) highStageCount++;
+  return r.val;
+ };
+
+ if(type==='weapon'){
+  stats.atk=rollWithStage(ceil(power*1.5));
+  stats.spd=rollWithStage(ceil(power));
+  stats.hp=rollWithStage();
+  stats.def=rollWithStage();
+ } else if(type==='armor'){
+  stats.hp=armorHpWithStage(ceil(power*2));
+  stats.def=rollWithStage(ceil(power*1.5));
+  stats.atk=rollWithStage();
+  stats.spd=rollWithStage();
+ } else if(type==='acc1'){
+  stats.hp=rollWithStage(ceil(power*.6));
+  stats.atk=rollWithStage(ceil(power));
+  stats.def=rollWithStage();
+  stats.spd=rollWithStage(ceil(power));
+ } else {
+  stats.hp=rollWithStage(ceil(power*.6));
+  stats.atk=rollWithStage();
+  stats.def=rollWithStage(ceil(power));
+  stats.spd=rollWithStage();
+ }
  Object.keys(stats).forEach(k=>stats[k]=Math.max(0,stats[k]));
- return {type,name:`${['古びた','旅人の','鋼の','精霊の','覇者の'][Math.min(4,Math.floor((rewardFloor-1)/200))]}${slotNames[type]}`,stats,floor:rewardFloor,boss};
+
+ // 800を超えた個数に応じて接頭辞（プレフィックス）を決定
+ let prefixModifier = '';
+ if(highStageCount === 1) prefixModifier = 'きらめく';
+ else if(highStageCount === 2) prefixModifier = '光る';
+ else if(highStageCount === 3) prefixModifier = '輝く';
+ else if(highStageCount >= 4) prefixModifier = '聖なる';
+
+ const basePrefix = ['古びた','旅人の','鋼の','精霊の','覇者の'][Math.min(4,Math.floor((rewardFloor-1)/200))];
+
+ return {
+  type,
+  name: `${prefixModifier}${basePrefix}${slotNames[type]}`,
+  stats,
+  floor: rewardFloor,
+  boss
+ };
 }
+
 function fmtStats(s){return `HP +${s.hp} / 攻 +${s.atk} / 防 +${s.def} / 速 +${s.spd}`}
 function renderGear(){ $('equipGrid').innerHTML=Object.keys(gear).map(k=>{let g=gear[k];return `<div class="equip"><div class="slot">${slotIcons[k]} ${slotNames[k]}</div><div class="item">${g?g.name+(g.boss?' ☆':''):'なし'}</div><div class="stats">${g?`HP+${g.stats.hp} 攻+${g.stats.atk} 防+${g.stats.def} 速+${g.stats.spd}`:'効果なし'}</div></div>`}).join('')}
 function compareGear(item,current){
