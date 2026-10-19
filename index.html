@@ -208,14 +208,15 @@ function makeGear(bossReward=false, rewardFloor=floor){
  const power=1+(rewardFloor-1)*.021, multiplier=boss?1.2:1;
  let stats={hp:0,atk:0,def:0,spd:0};
  
+ const pivotStage=800;
+
  const rollRange=(min,max)=>{
   const stageCount=1000;
   const maxStage=stageCount-1;
   const randomStage=rand(0,maxStage);
-  const pivotStage=800;
   const pivotRatio=20/218;
 
-  if(randomStage===maxStage)return {val: max, stage: randomStage}; // 段階も一緒に返すように調整
+  if(randomStage===maxStage)return {val: max, stage: randomStage};
   let ratio;
   if(randomStage<=pivotStage){
    const t=randomStage/pivotStage;
@@ -233,16 +234,15 @@ function makeGear(bossReward=false, rewardFloor=floor){
  const baseMaxBeforeExpansion=Math.max(1,ceil(4*power*multiplier));
  const baseMax=baseMaxBeforeExpansion*5;
 
- // 各パラメータの乱数ステージ（0〜999）がpivotStageを超えたかを判定するため、stageを保持する
  let highStageCount = 0;
  const rollWithStage = (bonus=0) => {
   const r = rollRange(baseMin+bonus, baseMax+bonus);
-  if(r.stage >= pivotStage) highStageCount++;
+  if(r.stage >= pivotStage) highStageCount++; // ⭕ >= に修正
   return r.val;
  };
  const armorHpWithStage = (bonus=0) => {
   const r = rollRange(baseMin*3+bonus, baseMax*3+bonus);
-  if(r.stage >= pivotStage) highStageCount++;
+  if(r.stage >= pivotStage) highStageCount++; // ⭕ >= に修正し、pivotStageを参照できるようにする
   return r.val;
  };
 
@@ -269,7 +269,6 @@ function makeGear(bossReward=false, rewardFloor=floor){
  }
  Object.keys(stats).forEach(k=>stats[k]=Math.max(0,stats[k]));
 
- // 800を超えた個数に応じて接頭辞（プレフィックス）を決定
  let prefixModifier = '';
  if(highStageCount === 1) prefixModifier = 'きらめく';
  else if(highStageCount === 2) prefixModifier = '光る';
@@ -286,7 +285,6 @@ function makeGear(bossReward=false, rewardFloor=floor){
   boss
  };
 }
-
 function fmtStats(s){return `HP +${s.hp} / 攻 +${s.atk} / 防 +${s.def} / 速 +${s.spd}`}
 function renderGear(){ $('equipGrid').innerHTML=Object.keys(gear).map(k=>{let g=gear[k];return `<div class="equip"><div class="slot">${slotIcons[k]} ${slotNames[k]}</div><div class="item">${g?g.name+(g.boss?' ☆':''):'なし'}</div><div class="stats">${g?`HP+${g.stats.hp} 攻+${g.stats.atk} 防+${g.stats.def} 速+${g.stats.spd}`:'効果なし'}</div></div>`}).join('')}
 function compareGear(item,current){
